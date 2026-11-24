@@ -1,0 +1,9 @@
+*.env
+.env*
+node_key.dat
+*keystore*
+private/
+evidence/raw/
+*.typescript
+*.time
+*.jsonl

@@ -1,0 +1,53 @@
+{
+  "author": "@khenzarweb3",
+  "network": "Devnet",
+  "role": "keyless non-voting RPC observer",
+  "tested_host": "Shared Contabo VPS, Ubuntu 24.04.5, x86_64",
+  "qualification_scope": "Same-host sync and restart rehearsal; not Testnet admission or a cross-host migration test",
+  "expected_genesis": "0x99c172c095340ace980631f9123544c6bebd4839f3437e463533422d8be2d631",
+  "node_image": "ghcr.io/flop-labs/flop-core/node-devnet@sha256:84498fd73db2464eb13088ab34d369ddf7cddd22a45c810d140c9ff8ec16c91d",
+  "chain_spec_sha256": "3b213c38e7678285bc38fbdfded5dbe3d6acbd16e836b14aaaeef2f6ae1cd16e",
+  "snapshot": {
+    "name": "20261124T033840Z-4495997",
+    "genesis_hash": "0x99c172c095340ace980631f9123544c6bebd4839f3437e463533422d8be2d631",
+    "published_node_image": "ghcr.io/flop-labs/flop-core/node-devnet:v0.1.449@sha256:e0a3118f81992a49678fcebd260a242bb6a3246036661761c0ac8875354e53ff",
+    "all_part_checksums_verified": true
+  },
+  "checks": {
+    "finalized_hashes_match": true,
+    "local_and_common_finalized_heights_advance": true,
+    "peer_id_unchanged_after_restart": true,
+    "same_compose_container_and_volume_retained": true,
+    "rpc_metrics_readiness_loopback_only": true
+  },
+  "observations": [
+    {
+      "phase": "before_restart",
+      "utc": "2026-11-24T21:08:20Z",
+      "local_finalized": 4558910,
+      "reference_finalized": 4558907,
+      "common_height": 4558907,
+      "local_hash": "0xe837226d136e6f9cb814ba31b59e1998ed93efa96ef74945b1e8da9ee914787f",
+      "reference_hash": "0xe837226d136e6f9cb814ba31b59e1998ed93efa96ef74945b1e8da9ee914787f"
+    },
+    {
+      "phase": "before_restart_followup",
+      "utc": "2026-11-24T21:09:22Z",
+      "local_finalized": 4558971,
+      "reference_finalized": 4558972,
+      "common_height": 4558971,
+      "local_hash": "0x3445545d866cf1a8851e9e4efac4ff485e7e74b750c1aaba54afd2c58e1972d3",
+      "reference_hash": "0x3445545d866cf1a8851e9e4efac4ff485e7e74b750c1aaba54afd2c58e1972d3"
+    },
+    {
+      "phase": "after_restart",
+      "utc": "2026-11-24T21:12:58Z",
+      "local_finalized": 4559187,
+      "reference_finalized": 4559187,
+      "common_height": 4559187,
+      "local_hash": "0xf338f1e661b44821c24fa13cb3cfd73a5eba2d12b12abfb401206e44b5ed5cbd",
+      "reference_hash": "0xf338f1e661b44821c24fa13cb3cfd73a5eba2d12b12abfb401206e44b5ed5cbd"
+    }
+  ],
+  "redactions": "Host addresses and peer identifiers are retained privately, not included here."
+}

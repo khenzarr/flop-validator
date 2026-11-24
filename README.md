@@ -4,7 +4,7 @@ An independent operator guide by [@khenzarweb3](https://x.com/khenzarweb3). Regi
 
 FLOP's November 24, 2026 opening FAQ describes Testnet as live for unscored testing and lists the signed joining kit as pending. Registration, sponsorship, seat assignment and activation are separate steps. Check the [Testnet opening FAQ](https://docs.flop.network/docs/network-testnet) for the current release status.
 
-> **Rehearsal status.** Live verification and terminal captures from our Contabo run are pending.
+> **Verified rehearsal — 24 November 2026 (UTC).** Our Contabo node passed the pinned-file checks, snapshot part checksums, finalized hash comparisons and same-volume restart test. Three observations show advancing finalized heights and the same peer ID across restart. This is a keyless Devnet rehearsal; Testnet admission and activation remain separate.
 
 ## 1. Register once for Testnet
 
@@ -12,7 +12,7 @@ Open the [operator application](https://github.com/flop-labs/network/issues/new?
 
 Registration requires no payment or signature. Keep the completed host worksheet, contact details and detailed rehearsal evidence private. Request a private coordination channel in your application. [FLOP preparation kit and worksheet](https://docs.flop.network/testnet-validator-prep/)
 
-## 2. Check your host and tools
+## 2. Connect and check your host
 
 Use a dedicated Linux host or isolated VM, and connect over SSH with `ssh USER@SERVER_IP`. Use `ssh -p PORT USER@SERVER_IP` when your provider assigned a nondefault SSH port. Confirm the machine has capacity for the archive and recovery operations. The rehearsal and production references come from FLOP.
 
@@ -34,6 +34,8 @@ df -h "$HOME"
 ss -ltn 'sport = :30333 or sport = :9944 or sport = :9615 or sport = :9619'
 ```
 
+## 3. Prepare the command-line tools
+
 On Ubuntu, use Docker's official APT instructions for a fresh Engine and Compose installation. Run Docker with an account already authorized to administer the local engine. [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
 
 ```bash
@@ -43,9 +45,9 @@ docker compose version
 docker_root=$(docker info --format '{{.DockerRootDir}}') && df -h "$docker_root"
 ```
 
-<!-- Insert the host and tool preflight screenshot from the actual rehearsal. -->
+![Host resources and installed Docker versions from our rehearsal](assets/01-host.png)
 
-## 3. Fetch and verify the Devnet bundle
+## 4. Fetch and verify the Devnet bundle
 
 Use a fresh project directory. This block stages the downloads and stops if any checksum fails. The six expected checksums and bundle revision are published in the [official FLOP Devnet RPC guide](https://gist.github.com/sv/7c8b93f3868bc15e3b6eabe0578057e3).
 
@@ -74,6 +76,8 @@ Use a fresh project directory. This block stages the downloads and stops if any 
 e184d4f38f054dbe7947efde4d85e6a8964f02e594666ad42b9216dd98a4b2d5  rpc-origin.Caddyfile
 3b213c38e7678285bc38fbdfded5dbe3d6acbd16e836b14aaaeef2f6ae1cd16e  chain.raw.json
 SUMS
+  # Public bind-mounted files must be readable by the non-root container user.
+  chmod 644 chain.raw.json node-entrypoint.sh rpc_ready.py rpc-origin.Caddyfile docker-compose.rpc.yml
   cp rpc-pool.env.example rpc-pool.env
   mv -T -- "$stage" "$destination"
 )
@@ -81,9 +85,9 @@ SUMS
 
 Continue after all six entries report `OK`. A failed attempt leaves its staging directory available for inspection.
 
-<!-- Insert the actual six-checksum terminal screenshot. -->
+![Six checksum checks from the actual pinned-bundle download](assets/02-checksums.png)
 
-## 4. Configure P2P and start the node
+## 5. Configure P2P without exposing RPC
 
 ```bash
 cd "$HOME/flop-devnet-rehearsal"
@@ -95,6 +99,10 @@ Set `COMPOSE_PROJECT_NAME=flop-devnet-rehearsal` once. Put the host interface's 
 
 Keep `RPC_BIND_IP=127.0.0.1` and `PROMETHEUS_BIND_IP=127.0.0.1`. Only P2P needs an inbound rule. Confirm RPC (9944), metrics (9615) and readiness (9619) publish on loopback. Keep the pinned image, chain spec, bootnode and archive settings in the bundle. [Docker port publishing](https://docs.docker.com/engine/network/port-publishing/)
 
+![Actual published listeners: P2P on the host interface and private loopback services](assets/03-network.png)
+
+## 6. Start the keyless observer
+
 ```bash
 dc() { docker compose --env-file rpc-pool.env -f docker-compose.rpc.yml "$@"; }
 dc config --quiet && dc pull && dc up -d && dc ps
@@ -105,15 +113,80 @@ curl --silent --show-error --max-time 5 --write-out '\nHTTP %{http_code}\n' \
 
 After reconnecting, repeat the project `cd` and `dc` definition. A `503` is expected during catch-up. Check for peers and moving block imports, then wait for HTTP `200`.
 
-<!-- Insert the actual Compose startup and readiness screenshots with host identifiers masked. -->
+![Initial startup and readiness while catching up](assets/03-startup.png)
 
-### Optional archive snapshot
+## 7. Optional: download a verified archive snapshot
 
-You can sync directly from genesis. For a faster bootstrap, use the [official snapshot procedure](https://gist.github.com/sv/7c8b93f3868bc15e3b6eabe0578057e3#optional-start-from-a-flop-snapshot), substituting `$HOME/flop-devnet-rehearsal` for the upstream project directory. Check free space for the compressed parts, unpacked archive and retained database. Preserve the same manifest across resumed downloads, match its Devnet genesis and verify each part checksum before unpacking.
+Direct sync from genesis is supported. A snapshot is faster but trusts FLOP's published historical database; your node only re-executes blocks after the snapshot height. Keep enough space for the compressed download, unpacked archive and old database. On our run the download was about 40 GiB; do not assume that size will stay fixed.
 
-Let Compose initialize the volume first and stop the observer before swapping the database. Locate the actual `/data` mount with Docker inspection and retain the original database for rollback. Preserve the node key and network directory. A snapshot starts block verification from its own height, so still run the finalized checks below.
+The following block keeps the first manifest when you resume a download. It checks the expected Devnet genesis, validates filenames, and verifies every downloaded part. It does not automatically retry errors. If the snapshot has expired, inspect the error before starting a fresh download directory.
 
-## 5. Prove finality, restart and repeat
+```bash
+(
+  set -euo pipefail
+  cd "$HOME/flop-devnet-rehearsal"
+  mkdir -p seed && cd seed
+  base=https://snapshots.flop.network/devnet-ts/archive
+  test -s latest.json || {
+    curl -fSL --connect-timeout 20 --max-time 60 "$base/latest.json" -o latest.json.tmp
+    mv latest.json.tmp latest.json
+  }
+  jq -e '.genesis_hash == "0x99c172c095340ace980631f9123544c6bebd4839f3437e463533422d8be2d631"' latest.json
+  name=$(jq -er .name latest.json)
+  [[ "$name" =~ ^[A-Za-z0-9_-]+$ ]]
+  jq -er '.parts[] | "\(.file) \(.bytes)"' latest.json | while read -r file bytes; do
+    [[ "$file" =~ ^db\.tar\.zst\.[a-z]+$ ]]
+    if [[ $(stat -c %s "$file" 2>/dev/null || echo 0) != "$bytes" ]]; then
+      curl -fSL --connect-timeout 20 --max-time 1800 --continue-at - \
+        "$base/$name/$file" -o "$file"
+    fi
+  done
+  jq -r '.parts[] | "\(.sha256)  \(.file)"' latest.json > SHA256SUMS
+  sha256sum --check SHA256SUMS
+  jq -r '.parts[].file' latest.json | xargs cat | zstd -dc | tar -tf - > archive-paths.txt
+  if grep -Eq '(^/|(^|/)\.\.(/|$))' archive-paths.txt; then
+    echo 'Unsafe archive path'; exit 1
+  fi
+  mkdir unpack
+  jq -r '.parts[].file' latest.json | xargs cat | zstd -dc | tar --no-same-owner -xf - -C unpack
+  test -d unpack/full
+)
+```
+
+All parts must report `OK`. Keep the snapshot's manifest: it identifies its image and height. Do not silently substitute its node image for the pinned bundle. If your node cannot open the snapshot database, stop it and restore the retained database instead of deleting your identity.
+
+![Official snapshot download and checksum verification](assets/04-snapshot.png)
+
+## 8. Install the snapshot with the node stopped
+
+Skip this step when syncing from genesis. Keep the original database until readiness and the finality tests pass. The swap below changes only this Compose project's data. It checks the `/data` mount instead of assuming a volume path.
+
+```bash
+(
+  set -euo pipefail
+  cd "$HOME/flop-devnet-rehearsal"
+  dc() { docker compose --env-file rpc-pool.env -f docker-compose.rpc.yml "$@"; }
+  container=$(dc ps -q rpc)
+  test -n "$container"
+  data=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/data"}}{{.Source}}{{end}}{{end}}' "$container")
+  test -n "$data"
+  db="$data/chains/flop_devnet_ts/db"
+  sudo test -d "$db/full"
+  sudo test ! -e "$db/full.from-genesis"
+  test -d seed/unpack/full
+  dc stop
+  sudo mv "$db/full" "$db/full.from-genesis"
+  sudo mv seed/unpack/full "$db/full"
+  sudo chown -R --reference="$db" "$db/full"
+  dc up -d
+)
+```
+
+Check readiness again with the command in step 6. A snapshot close to the current head can still need time to catch up. If startup reports a database compatibility error, stop the project, move the snapshot database aside, restore `full.from-genesis` as `full`, and resume genesis sync. Keep `node_key.dat` and the network directory unchanged.
+
+![Actual catch-up observations after loading the snapshot](assets/04-catchup.png)
+
+## 9. Prove finality, restart and repeat
 
 Paste this block into Bash after readiness returns HTTP `200`. It writes three UTC-stamped observations to a private receipt. It verifies block zero on both endpoints, compares finalized hashes at the lower finalized height, and requires advancing finality and a stable peer ID across restart.
 
@@ -187,9 +260,11 @@ Paste this block into Bash after readiness returns HTTP `200`. It writes three U
   printf 'Private receipt file — %s\n' "$receipt"
 
   first=$(observe before_restart)
+  printf '%s\n' "$first"
   printf '%s\n' "$first" >> "$receipt"
   sleep 60
   second=$(observe before_restart_followup)
+  printf '%s\n' "$second"
   printf '%s\n' "$second" >> "$receipt"
   require_progress "$first" "$second"
 
@@ -207,6 +282,7 @@ Paste this block into Bash after readiness returns HTTP `200`. It writes three U
   done
 
   after=$(observe after_restart)
+  printf '%s\n' "$after"
   printf '%s\n' "$after" >> "$receipt"
   require_progress "$second" "$after"
   echo 'PASS — finalized hashes match, finality advanced and the peer ID persisted.'
@@ -215,13 +291,108 @@ Paste this block into Bash after readiness returns HTTP `200`. It writes three U
 
 Keep the receipt with all three observations. Reference the before/after evidence on your Testnet application once the check passes, and share detailed data privately. A healthy container alone gives no evidence of finalized agreement.
 
-<!-- Insert the actual finalized comparison and restart proof screenshot. Mask private host identifiers. -->
+![Finality and restart verification from the rehearsal](assets/05-restart-proof.png)
 
-## 6. Maintain the rehearsal node
+Recorded results from our own run ([full hashes and verification summary](assets/verification-summary.json)):
+
+| Observation | UTC | Local finalized | Reference finalized | Common height |
+| --- | --- | ---: | ---: | ---: |
+| before_restart | 2026-11-24T21:08:20Z | 4558910 | 4558907 | 4558907 |
+| before_restart_followup | 2026-11-24T21:09:22Z | 4558971 | 4558972 | 4558971 |
+| after_restart | 2026-11-24T21:12:58Z | 4559187 | 4559187 | 4559187 |
+
+
+## 10. Maintain the rehearsal node
 
 - Use `dc stop` and `dc up -d` for a normal stop and resume. Retain the named volume and Compose project name.
+- Never use `docker compose down -v` or volume-pruning commands on node data you intend to retain.
 - Keep an encrypted backup of the private P2P identity at `/data/node_key.dat` in the node's data volume. Keep that file, the environment file, raw terminal captures and receipts out of Git. Retire the previous instance before you reuse its identity on a new host.
 - If readiness stays at `503`, check `dc ps`, `dc logs --tail=80 rpc ready` and the readiness response body. Look at free disk space, bootnode connectivity and peer count.
 - If hashes differ or finality stalls, stop qualification and retain the receipts and data. Compare your image, spec and reference to the official Devnet documentation before retrying.
 
 Use FLOP's signed Testnet kit and fresh Testnet keys when the operator release becomes available. Keep Testnet and Devnet data in separate projects. [FLOP Network releases](https://github.com/flop-labs/network/releases)
+
+
+## 11. Back up the private P2P identity
+
+The peer ID belongs to a private identity file. It is not a validator session key, but it must still stay private. Run these commands on the server while you are in the project directory:
+
+```bash
+(
+  set -euo pipefail
+  umask 077
+  dc() { docker compose --env-file rpc-pool.env -f docker-compose.rpc.yml "$@"; }
+  container=$(dc ps -q rpc)
+  test -n "$container"
+  data=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/data"}}{{.Source}}{{end}}{{end}}' "$container")
+  test -n "$data"
+  sudo test -f "$data/node_key.dat"
+  backup="$HOME/flop-private-backups/$(date -u +%Y%m%dT%H%M%SZ)"
+  mkdir -p "$backup"
+  sudo install -m 600 -o "$(id -u)" -g "$(id -g)" "$data/node_key.dat" "$backup/node_key.dat"
+  install -m 600 rpc-pool.env "$backup/rpc-pool.env"
+  echo 'Private backup created; no key contents printed.'
+)
+```
+
+Transfer that private backup over your authenticated SSH connection to your own encrypted storage. Keep an off-host copy. Do not upload it to GitHub, a public issue, or a recording. A backup stored only on the same VPS does not protect against loss of the VPS. Never run two live nodes with a copied identity.
+
+![Backup verification without showing private file contents](assets/06-backup.png)
+
+### Recover the same identity on another Devnet host
+
+Stop the old instance first. Prepare a new host with the same pinned Devnet inputs and its own correct interface/P2P configuration. Start its fresh project once to create the data volume and identity, then stop it. Copy your private backup to that host through an authenticated private channel. In the new project directory, replace **only** the generated P2P identity:
+
+```bash
+(
+  set -euo pipefail
+  dc() { docker compose --env-file rpc-pool.env -f docker-compose.rpc.yml "$@"; }
+  backup="$HOME/flop-restored-private-backup/node_key.dat"
+  test -s "$backup"
+  container=$(dc ps -aq rpc)
+  test -n "$container"
+  dc stop
+  data=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/data"}}{{.Source}}{{end}}{{end}}' "$container")
+  test -n "$data"
+  sudo test -f "$data/node_key.dat"
+  owner=$(sudo stat -c %u "$data/node_key.dat")
+  group=$(sudo stat -c %g "$data/node_key.dat")
+  sudo install -m 600 -o "$owner" -g "$group" "$backup" "$data/node_key.dat"
+  dc up -d
+)
+```
+
+Sync the new host and repeat step 9. Compare its Peer ID with your old private receipt before considering migration complete. This recovery procedure is separate from the recorded same-host restart test; no cross-host migration was performed for this guide. Do not reuse Devnet identities or databases as an assumed Testnet migration.
+
+## 12. Add evidence to your application
+
+Update the same Testnet application after the rehearsal. Keep the actual full hashes, UTC times, image digest, chain-spec checksum and unchanged peer ID in your private evidence. Follow the current form's instructions for public summaries and private coordination. Do not copy Devnet network parameters into a Testnet deployment.
+
+Suggested public summary, to use **only after your own checks pass**:
+
+```text
+Preparation: keyless Devnet sync and restart rehearsal completed.
+The local and reference genesis matched the expected Devnet genesis.
+Finalized hashes matched at common heights, finality advanced, and the
+peer ID persisted after restart with the same Compose project and volume.
+Detailed non-secret receipts are available for operator review.
+Testnet activation is pending the official signed joining kit and admission.
+```
+
+## Captures and scope
+
+The terminal images are rendered from our actual recorded VPS command output; they are not another operator's screenshots. Host addresses and private identifiers are redacted in public captures. The installation recordings retain their original timing privately; an edited playback may shorten download waits. No invented success output is used. Our shared Contabo host is an isolated **Compose project**, not a dedicated machine; FLOP recommends a dedicated host or isolated VM for qualification. Provider sizing and a successful rehearsal do not establish Testnet eligibility.
+
+The reader commands use a fresh home-directory project; the captures come from our separately named deployment. Keep your own project name and volume consistent through every restart.
+
+This guide does not submit an application, generate validator signing keys, join Testnet, promise rewards, or enable a public RPC origin. The instructions deliberately keep RPC, metrics and readiness on loopback.
+
+## Official references
+
+- [Validator preparation and private host worksheet](https://docs.flop.network/testnet-validator-prep/)
+- [Keyless Devnet node, pinned bundle and snapshot procedure](https://gist.github.com/sv/7c8b93f3868bc15e3b6eabe0578057e3)
+- [Operator application](https://github.com/flop-labs/network/issues/new?template=operator-application.yml)
+- [Operator hub](https://docs.flop.network/operators)
+- [FLOP Network releases](https://github.com/flop-labs/network/releases)
+
+Prepared independently by [@khenzarweb3](https://x.com/khenzarweb3).
