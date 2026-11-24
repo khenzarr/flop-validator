@@ -16,15 +16,19 @@ Registration requires no payment or signature. Keep the completed host worksheet
 
 Use a dedicated Linux host or isolated VM, and connect over SSH with `ssh USER@SERVER_IP`. Use `ssh -p PORT USER@SERVER_IP` when your provider assigned a nondefault SSH port. Confirm the machine has capacity for the archive and recovery operations. The rehearsal and production references come from FLOP.
 
-| Resource | Keyless Devnet pilot reference | Testnet validator reference |
-| --- | --- | --- |
-| CPU | Linux x86-64, 4 vCPU | Linux amd64, 8 physical cores at 3.4 GHz or faster |
-| Memory | 16 GiB RAM | 32 GB ECC, 64 GB recommended |
-| Storage | 300 GB SSD starting point | 4 TB enterprise NVMe |
-| Networking | Stable public IPv4, inbound TCP 30333 by default | 1 Gbps symmetric, public P2P and filtered DA according to release |
-| GPU | None | None |
+### Requirements: rehearsal vs. Testnet validator
 
-The archive grows over time, so check free space on Docker's storage filesystem as well as your workspace. The Testnet preparation kit also lists Node.js 24+, Docker Engine 28+, Compose and `flock` for validator preparation.
+**For the keyless Devnet rehearsal, start with the smaller configuration below. You do not need to rent the full Testnet validator reference hardware just to complete this exercise.** FLOP lists this as an observed pilot configuration, rather than a guaranteed minimum for every host. [Official Devnet host reference](https://gist.github.com/sv/7c8b93f3868bc15e3b6eabe0578057e3)
+
+| Resource | Rehearsal starting configuration | Testnet validator reference |
+| --- | --- | --- |
+| CPU | **4 vCPU**, Linux x86-64 | Linux amd64, 8 physical cores at 3.4 GHz or faster |
+| Memory | **16 GiB RAM** | 32 GB ECC, 64 GB recommended |
+| Storage | **300 GB SSD** starting capacity | 4 TB enterprise NVMe |
+| Networking | **Stable public IPv4; inbound TCP 30333** by default | 1 Gbps symmetric, public P2P and filtered DA according to release |
+| GPU | **Not needed** | Not needed |
+
+The archive grows continuously: 300 GB is a starting capacity, not unlimited retention. On an existing server, check **available space**, not only the advertised disk size, including room for snapshot download, extraction and rollback. Check Docker's storage filesystem as well as your workspace. The Testnet preparation kit also lists Node.js 24+, Docker Engine 28+, Compose and `flock` for validator preparation.
 
 ```bash
 uname -m
@@ -378,14 +382,6 @@ peer ID persisted after restart with the same Compose project and volume.
 Detailed non-secret receipts are available for operator review.
 Testnet activation is pending the official signed joining kit and admission.
 ```
-
-## Captures and scope
-
-The terminal images are rendered from our actual recorded VPS command output; they are not another operator's screenshots. Host addresses and private identifiers are redacted in public captures. The installation recordings retain their original timing privately; an edited playback may shorten download waits. No invented success output is used. Our shared Contabo host is an isolated **Compose project**, not a dedicated machine; FLOP recommends a dedicated host or isolated VM for qualification. Provider sizing and a successful rehearsal do not establish Testnet eligibility.
-
-The reader commands use a fresh home-directory project; the captures come from our separately named deployment. Keep your own project name and volume consistent through every restart.
-
-This guide does not submit an application, generate validator signing keys, join Testnet, promise rewards, or enable a public RPC origin. The instructions deliberately keep RPC, metrics and readiness on loopback.
 
 ## Official references
 

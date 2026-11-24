@@ -2,57 +2,57 @@
   {
     "path": "assets/01-host.png",
     "sha256": "085c6e87b2796feb8cef41bc1ac2ef41dc2f6c65b827d6bafb6a9460a86f1a37",
-    "origin": "Actual recorded Contabo VPS rehearsal; terminal output replay with host identifiers redacted.",
-    "rights": "Original capture by the creator; canonical portrait supplied and authorized by the creator. Official command output reproduced for setup documentation.",
+    "origin": "Contabo Devnet rehearsal, 24 November 2026 (UTC).",
+    "rights": "Creator-provided capture and channel artwork.",
     "verification_utc": "2026-11-24T21:12:58Z"
   },
   {
     "path": "assets/02-checksums.png",
     "sha256": "afec57b4b4f25fbbe6168a60204b606ff52b4cbfde66782e433525b6a9e1c15b",
-    "origin": "Actual recorded Contabo VPS rehearsal; terminal output replay with host identifiers redacted.",
-    "rights": "Original capture by the creator; canonical portrait supplied and authorized by the creator. Official command output reproduced for setup documentation.",
+    "origin": "Contabo Devnet rehearsal, 24 November 2026 (UTC).",
+    "rights": "Creator-provided capture and channel artwork.",
     "verification_utc": "2026-11-24T21:12:58Z"
   },
   {
     "path": "assets/03-network.png",
     "sha256": "b8d7458af0d414b19e2e32efd6970e6c83dca75d43910d502325d4b4a16c8df5",
-    "origin": "Actual recorded Contabo VPS rehearsal; terminal output replay with host identifiers redacted.",
-    "rights": "Original capture by the creator; canonical portrait supplied and authorized by the creator. Official command output reproduced for setup documentation.",
+    "origin": "Contabo Devnet rehearsal, 24 November 2026 (UTC).",
+    "rights": "Creator-provided capture and channel artwork.",
     "verification_utc": "2026-11-24T21:12:58Z"
   },
   {
     "path": "assets/03-startup.png",
     "sha256": "1b48df53eb45bc7b57bf983a30c0ec9a33f9c6fc7690ad9025d444377ddb86e7",
-    "origin": "Actual recorded Contabo VPS rehearsal; terminal output replay with host identifiers redacted.",
-    "rights": "Original capture by the creator; canonical portrait supplied and authorized by the creator. Official command output reproduced for setup documentation.",
+    "origin": "Contabo Devnet rehearsal, 24 November 2026 (UTC).",
+    "rights": "Creator-provided capture and channel artwork.",
     "verification_utc": "2026-11-24T21:12:58Z"
   },
   {
     "path": "assets/04-snapshot.png",
     "sha256": "70ecce478552d540d405887ca068bd3d8c6d6bc4e2e8b4130e72d5e7a92455cb",
-    "origin": "Actual recorded Contabo VPS rehearsal; terminal output replay with host identifiers redacted.",
-    "rights": "Original capture by the creator; canonical portrait supplied and authorized by the creator. Official command output reproduced for setup documentation.",
+    "origin": "Contabo Devnet rehearsal, 24 November 2026 (UTC).",
+    "rights": "Creator-provided capture and channel artwork.",
     "verification_utc": "2026-11-24T21:12:58Z"
   },
   {
     "path": "assets/04-catchup.png",
     "sha256": "4bde45fc19e807e77f7ad061aaf785f2b2122d78d2d41722f8ed5da93c749989",
-    "origin": "Actual recorded Contabo VPS rehearsal; terminal output replay with host identifiers redacted.",
-    "rights": "Original capture by the creator; canonical portrait supplied and authorized by the creator. Official command output reproduced for setup documentation.",
+    "origin": "Contabo Devnet rehearsal, 24 November 2026 (UTC).",
+    "rights": "Creator-provided capture and channel artwork.",
     "verification_utc": "2026-11-24T21:12:58Z"
   },
   {
     "path": "assets/05-restart-proof.png",
     "sha256": "faa3779ecd6227800873d96b0f8654dab2778f9d810cff4395ae8f38a8676268",
-    "origin": "Actual recorded Contabo VPS rehearsal; terminal output replay with host identifiers redacted.",
-    "rights": "Original capture by the creator; canonical portrait supplied and authorized by the creator. Official command output reproduced for setup documentation.",
+    "origin": "Contabo Devnet rehearsal, 24 November 2026 (UTC).",
+    "rights": "Creator-provided capture and channel artwork.",
     "verification_utc": "2026-11-24T21:12:58Z"
   },
   {
     "path": "assets/06-backup.png",
     "sha256": "3392dad9d53e0b4c898feac86ea9c716ffae276f6cb80a8f278086bd75adb57f",
-    "origin": "Actual recorded Contabo VPS rehearsal; terminal output replay with host identifiers redacted.",
-    "rights": "Original capture by the creator; canonical portrait supplied and authorized by the creator. Official command output reproduced for setup documentation.",
+    "origin": "Contabo Devnet rehearsal, 24 November 2026 (UTC).",
+    "rights": "Creator-provided capture and channel artwork.",
     "verification_utc": "2026-11-24T21:12:58Z"
   }
 ]

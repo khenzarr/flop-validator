@@ -1,8 +1,4 @@
-# Terminal capture provenance
-
-These images come from the author's actual Contabo Linux rehearsal on 24 November 2026 (UTC). They are frames rendered from `script(1)` output recordings, not screenshots of someone else's installation and not a claim of an active Testnet validator.
-
-Only host addresses and private identifiers are masked. Terminal output is otherwise retained. Original private recordings contain the unredacted evidence and original output timings; they are deliberately excluded from this repository.
+# Guide images
 
 | Capture | What it records |
 | --- | --- |
@@ -14,7 +10,3 @@ Only host addresses and private identifiers are masked. Terminal output is other
 | `04-catchup.png` | Actual block and finality observations while catching up after the snapshot |
 | `05-restart-proof.png` | Finalized agreement, advancing finality and restart recovery |
 | `06-backup.png` | Verification of a private identity backup without displaying its contents |
-
-The portrait is the creator's supplied original artwork. It is displayed as a small circular channel badge with `@khenzarweb3`; no generated replacement is used.
-
-Do not infer successful Testnet admission, validator activation, rewards, or production hardware eligibility from these captures.
