@@ -54,5 +54,17 @@
     "origin": "Contabo Devnet rehearsal, 24 November 2026 (UTC).",
     "rights": "Creator-provided capture and channel artwork.",
     "verification_utc": "2026-11-24T21:12:58Z"
+  },
+  {
+    "path": "assets/video-cover.png",
+    "sha256": "43bc21ef3446c74db63ed0a0ebbe47df7b86d7c4ae99870ed459a26fc80f7388",
+    "origin": "Creator VPS FLOP command walkthrough.",
+    "rights": "Creator-provided recording and channel artwork."
+  },
+  {
+    "path": "assets/flop-devnet-walkthrough.mp4",
+    "sha256": "4494ce3cd060de10e2bf55cea443e4c895da8d385c88c7baffd045ff430ea411",
+    "origin": "Creator VPS FLOP command walkthrough.",
+    "rights": "Creator-provided recording and channel artwork."
   }
 ]

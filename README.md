@@ -1,5 +1,9 @@
 # FLOP validator prep and Devnet rehearsal
 
+[![Watch the step-by-step FLOP Devnet walkthrough](assets/video-cover.png)](assets/flop-devnet-walkthrough.mp4)
+
+**[▶ Watch the walkthrough — 1 min 27 sec](assets/flop-devnet-walkthrough.mp4)** · 12 steps · English · No audio
+
 An independent operator guide by [@khenzarweb3](https://x.com/khenzarweb3). Register a Testnet validator candidacy, then run a FLOP Devnet observer on Linux to prove it follows finality and recovers after a restart. The observer uses no validator signing keys, stake or GPU.
 
 FLOP's November 24, 2026 opening FAQ describes Testnet as live for unscored testing and lists the signed joining kit as pending. Registration, sponsorship, seat assignment and activation are separate steps. Check the [Testnet opening FAQ](https://docs.flop.network/docs/network-testnet) for the current release status.
